@@ -209,9 +209,11 @@ pca_data <- as.data.frame(cbind(PC1 = pca_components[, 1],
 pca_data$PC1 = as.numeric(pca_data$PC1)
 pca_data$PC2 = as.numeric(pca_data$PC2)
 
+text.size = 3
+
 # plot these PCs
 g.pca = ggplot(pca_data, aes(x=PC1, y=PC2, label=labels)) + geom_point() + 
-  geom_text_repel(size=2, max.overlaps=30) + theme_light()
+  geom_text_repel(size=text.size, max.overlaps=30, segment.color="#00000044") + theme_light()
 sf = 3
 png(paste0("PCA-", species.label, ".png"), width=600*sf, height=400*sf, res=72*sf)
 print(g.pca)
@@ -235,15 +237,15 @@ mds.df = data.frame(label=uniq.countries,
                     y = mds_result[,2])
 # plot MDS embedding
 g.mds = ggplot(mds.df, aes(x=x,y=y,label=label)) + geom_point() + 
-  geom_text_repel(size=2, max.overlaps=20) + 
+  geom_text_repel(size=text.size, max.overlaps=20, segment.color="#00000044") + 
   xlab("MDS coord 1") + ylab("MDS coord 2") + theme_light()
 sf = 3
 png(paste0("MDS-", species.label, ".png"), width=600*sf, height=400*sf, res=72*sf)
 print(g.mds)
 dev.off()
 
-png(paste0("MDS-PCA-", species.label, ".png"), width=1000*sf, height=400*sf, res=72*sf)
-print(ggarrange(g.mds, g.pca))
+png(paste0("MDS-PCA-", species.label, ".png"), width=500*sf, height=600*sf, res=72*sf)
+print(ggarrange(g.mds, g.pca, nrow=2))
 dev.off()
 
 # heatmap visualisation of l1 distances
