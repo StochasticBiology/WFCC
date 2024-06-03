@@ -235,17 +235,26 @@ mds_result <- cmdscale(l1.mat, k = 2)
 mds.df = data.frame(label=uniq.countries,
                     x = mds_result[,1],
                     y = mds_result[,2])
+clu.1 = c("Nepal", "Guatemala", "Lebanon", "Hong Kong", "Uganda", "Madagascar", "Philippines")
+clu.2 = c("Sweden", "Ecuador", "Ireland", "Brazil", "Colombia", "Finland")
+
+mds.plot = mds.df
+mds.plot$label[mds.plot$label=="Nepal"] = "Cluster 1"
+mds.plot$label[mds.plot$label=="Sweden"] = "Cluster 2"
+mds.plot = mds.plot[!(mds.plot$label %in% clu.1 | mds.plot$label %in% clu.2),]
+
 # plot MDS embedding
-g.mds = ggplot(mds.df, aes(x=x,y=y,label=label)) + geom_point() + 
+g.mds = ggplot(mds.plot, aes(x=x,y=y,label=label)) + geom_point() + 
   geom_text_repel(size=text.size, max.overlaps=20, segment.color="#00000044") + 
+ # xlim(-6, 6) +
   xlab("MDS coord 1") + ylab("MDS coord 2") + theme_light()
-sf = 3
+sf = 4
 png(paste0("MDS-", species.label, ".png"), width=600*sf, height=400*sf, res=72*sf)
 print(g.mds)
 dev.off()
 
 png(paste0("MDS-PCA-", species.label, ".png"), width=500*sf, height=600*sf, res=72*sf)
-print(ggarrange(g.mds, g.pca, nrow=2))
+print(ggarrange(g.mds, g.pca, nrow=2, labels=c("A", "B")))
 dev.off()
 
 # heatmap visualisation of l1 distances
@@ -284,7 +293,7 @@ WFCC = function(g.1, g.2) {
 # with different evolutionary pathways (from visual inspection)
 res.df = data.frame()
 ref.name = "Hong Kong"
-test.names = c("Kenya", "Sweden", "Norway", "Bulgaria", "Italy", "Spain", "Belgium")
+test.names = c("Belgium", "Spain", "Italy", "Bulgaria", "Norway", "Sweden", "Kenya")
 # loop over comparisons
 for(i in 1:length(test.names)) {
   this.test = test.names[i]
@@ -299,20 +308,30 @@ for(i in 1:length(test.names)) {
 
 # plot WFCC in log space
 g.wfcc.log = ggplot(res.df[res.df$fVals > 0,], aes(x=fVals, y=WFCC, color=factor(test, levels=test.names))) + 
-  geom_step(linewidth=3, alpha=0.5, direction="hv") + 
-  scale_y_log10() + labs(color="Country") + theme_light() 
+  geom_step(linewidth=1, direction="hv") + 
+   scale_color_manual(values = c("#00AAAA", "purple", "orange", "darkgreen", "red", "blue", "gray")) +
+#  scale_color_viridis_d() +
+  scale_y_log10() + labs(x = "Filtration value", color="Country") + 
+  theme_light() +
+  theme(panel.grid.major = element_blank(),  
+        panel.grid.minor = element_blank()) + ggtitle("Null compared to:")
 
 # plot zoomed-in WFCC in lin space
 g.wfcc.lin = ggplot(res.df[res.df$fVals >= 0,], aes(x=fVals, y=WFCC, color=factor(test, levels=test.names))) + 
   geom_step(linewidth=1, alpha=1, direction="hv") + coord_cartesian(xlim = c(-0.001,0.025)) +
-  labs(color="Country") + theme_light()
+  scale_color_manual(values = c("#00AAAA", "purple", "orange", "darkgreen", "red", "blue", "gray")) +
+ # scale_color_viridis_d() +
+  labs(x = "Filtration value", color="Country") + 
+  theme_light() + 
+  theme(panel.grid.major = element_blank(),  
+        panel.grid.minor = element_blank()) + ggtitle("Null compared to:")
 
-sf = 3
-png(paste0("WFCC-", species.label, ".png"), width=1000*sf, height=500*sf, res=72*sf)
-print(ggarrange(g.wfcc.log, g.wfcc.lin))
+sf = 4.5
+png(paste0("WFCC-", species.label, ".png"), width=800*sf, height=300*sf, res=72*sf)
+print(ggarrange(g.wfcc.log, g.wfcc.lin, labels=c("A", "B")))
 dev.off()
 
-sf = 3
+sf = 4.5
 png(paste0("WFCC-lin-", species.label, ".png"), width=600*sf, height=400*sf, res=72*sf)
 print(g.wfcc.lin)
 dev.off()
